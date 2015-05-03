@@ -1,6 +1,8 @@
 machine:
     python:
         version: 3.4.2
+    java:
+        version: openjdk7
 test:
     override:
         - python -m unittest
