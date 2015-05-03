@@ -1,5 +1,13 @@
 import unittest
-from analyse import CasingEngine, VerbosityEngine, PrefixEngine, SubsequenceEngine, analyse
+
+from analyse import (
+    CasingEngine,
+    VerbosityEngine,
+    PrefixEngine,
+    SubsequenceEngine,
+    analyse,
+)
+
 
 class TestCasingEngine(unittest.TestCase):
     def test_camel(self):

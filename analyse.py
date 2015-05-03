@@ -1,17 +1,11 @@
 from collections import Counter
-import pandas as pd
 import re
-
 import logging
-logging.basicConfig(level=logging.DEBUG)
-"""
-Engines available:
 
-    class VerbosityEngine():
-    class CasingEngine():
-    class PrefixEngine():
-    class SubsequenceEngine():
-"""
+import pandas as pd
+
+logging.basicConfig(level=logging.DEBUG)
+
 
 def analyse(variables):
     """
@@ -202,7 +196,6 @@ class VerbosityEngine():
 
 
     def analyse(self):
-        import pandas as pd
         s = pd.Series(map(len, self.variables))
         mean, median = s.mean(), s.median()
         if mean < 5:
