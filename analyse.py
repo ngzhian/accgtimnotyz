@@ -8,7 +8,6 @@ logging.basicConfig(level=logging.DEBUG)
 """
 Engines available:
 
-    class PrefixEngine():
     class VerbosityEngine():
     class CasingEngine():
     class PrefixEngine():
@@ -112,14 +111,14 @@ class TestAnalyse(unittest.TestCase):
 class SubsequenceEngine():
     """Analyses what is the most common subsequence of a variable name"""
     def __init__(self, variables):
-        self.name = 'Subsequence Engine'
+        self.name = 'Subsequence'
         self.variables = variables
 
     def analyse(self):
         cnt = Counter()
         def get_subsequences(word):
             for start in range(0, len(word) + 1):
-                for end in range(start + 2, len(word) + 1):
+                for end in range(start + 1, len(word) + 1):
                     if end > len(word):
                         continue
                     sub = word[start:end]
@@ -128,19 +127,16 @@ class SubsequenceEngine():
                     yield sub
 
         for var in self.variables:
-            if len(var) <= 2:
-                continue
             for sub in get_subsequences(var):
-                if len(sub) > 1:
-                    # 1 letter prefixes are too common, ignore
-                    cnt[sub] += 1
+                # 1 letter prefixes are too common, ignore?
+                cnt[sub] += 1
 
         most_common = cnt.most_common(1)[0]
         sub, count = most_common
 
         return Result(
             sub,
-            'You includes these charactors, %s, a lot, %s times.' %
+            'You include these characters, %s, a lot, like %s times.' %
             (sub, count))
 
 class TestSubsequenceEngine(unittest.TestCase):
@@ -153,26 +149,29 @@ class TestSubsequenceEngine(unittest.TestCase):
 class PrefixEngine():
     """Analyses what is the most common prefix of a variable name"""
     def __init__(self, variables):
-        self.name = 'Prefix Engine'
+        self.name = 'Prefix'
         self.variables = variables
+
+    def message(self, attribute, **kwargs):
+        prefix = 'You like to start your variables with {attribute} a lot. '
+        suffix = 'Did it {count} times.'
+        msg = prefix.format(attribute=attribute)
+        msg += suffix.format(**kwargs)
+        return msg
 
     def analyse(self):
         cnt = Counter()
         def get_prefixes(word):
             # 1 letter prefixes are too common, ignore
-            return (word[:end] for end in range(2, len(word) + 1)) 
+            return (word[:end] for end in range(1, len(word) + 1)) 
         for var in self.variables:
             for prefix in get_prefixes(var):
-                if len(prefix) > 1:
-                    cnt[prefix] += 1
+                cnt[prefix] += 1
 
         most_common = cnt.most_common(1)[0]
         prefix, count = most_common
 
-        return Result(
-            prefix,
-            'You like to start your variables with %s a lot, %s times.' %
-            (prefix, count))
+        return Result(prefix, self.message(prefix, count=count))
 
 class TestPrefixEngine(unittest.TestCase):
     def test_prefixes(self):
@@ -184,8 +183,24 @@ class TestPrefixEngine(unittest.TestCase):
 class VerbosityEngine():
     """Analyses how concise/verbose you are based on variable name length"""
     def __init__(self, variables):
-        self.name = 'Verbosity Engine'
+        self.name = 'Verbosity'
         self.variables = variables
+
+    def message(self, attribute):
+        prefix = suffix = ''
+        if attribute == 'concise':
+            prefix = 'You code concisely. '
+            suffix = 'Word.'
+        elif attribute == 'verbose':
+            prefix = 'You code reads like prose. '
+            prefix += 'I mean like Lord of the Rings. '
+            suffix = 'If I had a penny for every letter you typed... '
+            suffix += 'I wouldn\'t need to come to Disrupt for free food'
+        else:
+            suffix = 'I am confused'
+
+        return prefix + suffix
+
 
     def analyse(self):
         import pandas as pd
@@ -197,9 +212,7 @@ class VerbosityEngine():
             style = 'verbose'
         else:
             style = 'confused'
-        return Result(
-            style,
-            style)
+        return Result(style, self.message(style))
 
 class TestVerbosityEngine(unittest.TestCase):
     def test_concise(self):
@@ -216,8 +229,23 @@ class TestVerbosityEngine(unittest.TestCase):
 class CasingEngine():
     """Analyses the case convention of variable names"""
     def __init__(self, variables):
-        self.name = 'Casing Engine'
+        self.name = 'Casing'
         self.variables = variables
+
+    def message(self, attribute):
+        prefix = suffix = ''
+        if attribute == 'camelCase':
+            prefix = 'yOu coDe in caMelCasE likE tHiS.'
+            suffix = 'What, are you a camel?'
+        elif attribute == 'under_score':
+            prefix = 'you_code_in_under_score_case_like_this'
+            suffix = 'who_the_can_read_like_this____?'
+        else:
+            prefix = 'Your casing convention is completly neutral. '
+            suffix = 'AKA boring.'
+
+        msg = prefix + suffix
+        return msg
 
     def analyse(self):
         camel_re = re.compile(r'[a-z]+[A-Z]')
@@ -248,14 +276,7 @@ class CasingEngine():
         elif cnt['under_score'] >= skew_number:
             case_style = 'under_score'
 
-        if case_style == 'neutral':
-            return Result(
-                case_style,
-                'Yea, you\' pretty basic.')
-
-        return Result(
-            case_style,
-            'Have more variables named in the %s style.' % case_style)
+        return Result(case_style, self.message(case_style))
 
 class TestCasingEngine(unittest.TestCase):
     def test_camel(self):
