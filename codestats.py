@@ -73,7 +73,7 @@ def save_number_to_sms():
 
     NUMBER[fid] = number
     return jsonify(
-        message='Saved, we\'ll text %s when it\'s done.' % number)
+        message='Gotcha, we\'ll text %s when we\re ready to DISRUPT!!!' % number)
 
 def maybe_send_text(fid):
     if fid in STORE and fid in NUMBER:
