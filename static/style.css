@@ -1,0 +1,23 @@
+body {
+  font-size: 20px;
+}
+
+.container {
+  max-width: 1024px;
+  margin: auto auto;
+  text-align: center;
+}
+
+textarea, button {
+  font-size: inherit;
+}
+
+.submit-btn {
+  padding: 12px;
+  margin: 24px;
+  width: 50%;
+}
+
+.leaderboard {
+    width: 100%;
+}

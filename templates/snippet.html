@@ -1,0 +1,70 @@
+<!doctype html>
+<head>
+<link type="text/css" href="../static/style.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+  <h1>CodeStats</h1>
+  <div class="highlights-block">
+    {% for n, v in results['analysis'].items() %}
+    <p>{{ v['reason'] }}</p>
+    {% endfor %}
+
+    <h2>Longest variable</h2>
+    {% for n, v in results['highlights']['longest'].items() %}
+    <p>{{ n }} </p>
+    <p>has {{ v }} characters!</p>
+    {% endfor %}
+
+    <h2>Most used variable name</h2>
+    {% for n, v in results['highlights']['most_used'].items() %}
+    <p>{{ n }} </p>
+    <p>Used {{ v }} times!</p>
+    {% endfor %}
+
+  </div><!-- end highlights-block -->
+
+  <div class="stats-block">
+
+    <h2>Top 10 longest variable names</h2>
+    <table class="leaderboard">
+      <tbody>
+      {% for l in results['stats']['longest_10'] %}
+      <tr>
+        {% for n, v in l.items() %}
+        <td>{{ n }}</td>
+        <td>{{ v }}</td>
+      </tr>
+      {% endfor %}
+      {% endfor %}
+      </tbody>
+    </table>
+
+    <h2>Top 10 most used variable names</h2>
+    <table class="leaderboard">
+      <tbody>
+      {% for l in results['stats']['most_used_10'] %}
+      <tr>
+        {% for n, v in l.items() %}
+        <td>{{ n }}</td>
+        <td>{{ v }}</td>
+      </tr>
+      {% endfor %}
+      {% endfor %}
+      </tbody>
+    </table>
+
+  </div><!-- end stats-block -->
+
+  <div class="raw-block" style="display: none;">
+    {{ results }}
+  </div>
+  <div class="all-vars-block">
+    <h2>Here are all the variable names you used</h2>
+    {% for var in results['raw']['length'].keys() %}
+    <p>{{ var }} </p>
+    {% endfor %}
+  </div>
+</div>
+</body>
+</html>
