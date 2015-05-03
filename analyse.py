@@ -108,7 +108,7 @@ class SubsequenceEngine():
         cnt2 = Counter()
 
         def camel_case_split(identifier):
-            matches = refinditer(
+            matches = re.finditer(
                 '.+?(?:(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])|$)',
                 identifier)
             return [m.group(0) for m in matches]
@@ -194,7 +194,7 @@ class VerbosityEngine():
             prefix = 'You code reads like prose. '
             prefix += 'I mean like Lord of the Rings. '
             suffix = 'If I had a penny for every letter you typed... '
-            suffix += 'I wouldn\'t need to come to Disrupt for free food'
+            suffix += 'I wouldn\'t need to come to Disrupt for free food.'
         else:
             suffix = 'I am confused'
 
@@ -205,9 +205,9 @@ class VerbosityEngine():
         import pandas as pd
         s = pd.Series(map(len, self.variables))
         mean, median = s.mean(), s.median()
-        if mean < 5 or mean < median:
+        if mean < 5:
             style = 'concise'
-        elif mean > median:
+        elif mean > 7:
             style = 'verbose'
         else:
             style = 'confused'
@@ -281,6 +281,3 @@ def case(var):
         return 'under_score'
     else:
         return 'neutral'
-
-if __name__ == '__main__':
-    unittest.main()

@@ -25,9 +25,9 @@ class TestVerbosityEngine(unittest.TestCase):
         self.assertEqual(result.attribute, 'concise')
 
     def test_verbose(self):
-        engine = VerbosityEngine(['short', 'is', 'sweet'])
+        engine = VerbosityEngine(['iLikeLongName', 'thisSweetVariable', 'sweet'])
         result = engine.analyse()
-        self.assertEqual(result.attribute, 'concise')
+        self.assertEqual(result.attribute, 'verbose')
 
 
 class TestPrefixEngine(unittest.TestCase):
@@ -53,3 +53,6 @@ class TestAnalyse(unittest.TestCase):
         self.assertEqual(
             results['stats']['longest_10'],
             [{'hijkl': 5}, {'asdf': 4}])
+
+if __name__ == '__main__':
+    unittest.main()
