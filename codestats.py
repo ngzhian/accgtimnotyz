@@ -12,6 +12,8 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 
 app = Flask(__name__)
+TWILIO_SID = os.getenv('TWILIO_SID')
+TWILIO_TOKEN = os.getenv('TWILIO_TOKEN')
 
 @app.route("/")
 def index():
@@ -37,10 +39,20 @@ def show_stats(fid):
 # renders the analysis of a snippet of js
 @app.route('/s', methods=['POST'])
 def js_snippet():
-    # if post, return random number with
+    # prefer URL to snippet
     snippet = request.form['snippet']
+    url = request.form['url']
     fid = request.form['fid']
-    results = snippet_to_results(snippet)
+
+    if not snippet and not url:
+        return jsonify()
+
+    if url:
+        resp = requests.get(url)
+        snippet = resp.content.decode('utf-8')
+        results = snippet_to_results(snippet)
+    elif snippet:
+        results = snippet_to_results(snippet)
 
     logging.debug('FID: %s', fid)
     STORE[fid] = results
@@ -72,7 +84,7 @@ def send_sms(fid):
         return
 
     url = ('https://api.twilio.com/2010-04-01/Accounts/'
-           'AC8d2bfcff457395a5ea4f23a2eaf005b9/Messages')
+           '{sid}/Messages'.format(sid=TWILIO_SID))
     from_number = '+12015966238'
     to_number = NUMBER[fid]
     view_url = url_for('show_stats', fid=fid)
@@ -82,8 +94,7 @@ def send_sms(fid):
             'To': to_number,
             'Body': 'It\'s ready! Go to %s' % view_url
         },
-        auth=('AC8d2bfcff457395a5ea4f23a2eaf005b9',
-            '48136ece4272965c9018d241e5b47d15'))
+        auth=(TWILIO_SID, TWILIO_TOKEN))
 
 
 @lru_cache(maxsize=32)

@@ -1,5 +1,4 @@
 from collections import Counter
-import unittest
 import pandas as pd
 import re
 
@@ -51,16 +50,16 @@ def analyse(variables):
 
     # gets the length of each variable
     df['length'] = df['name'].map(len)
-    length = df['length']
+    length = df.groupby('name').max()['length']
 
-    longest_10 = df['length'].order(ascending=False)[:10]
+    longest_10 = length.order(ascending=False)[:10]
     longest = longest_10[:1]
 
     # count how many times each variable is used
     usage = df.groupby('name').sum()['count']
     most_used_10 = usage.order(ascending=False)[:10]
     most_used = most_used_10[:1]
-    usage_dict = df.groupby('name').sum()['count'].to_dict()
+
     highlights = {
         'longest': longest.to_dict(),
         'most_used': most_used.to_dict(),
@@ -98,16 +97,6 @@ def analyse(variables):
 def to_list_of_dicts(series):
     return [{k:v} for k, v in series.iteritems()] 
 
-class TestAnalyse(unittest.TestCase):
-    def test_all(self):
-        variables = ['asdf', 'hijkl']
-        results = analyse(variables)
-        self.assertEqual(
-            results['highlights']['longest'], {'hijkl': 5})
-        self.assertEqual(
-            results['stats']['longest_10'],
-            [{'hijkl': 5}, {'asdf': 4}])
-
 class SubsequenceEngine():
     """Analyses what is the most common subsequence of a variable name"""
     def __init__(self, variables):
@@ -116,35 +105,45 @@ class SubsequenceEngine():
 
     def analyse(self):
         cnt = Counter()
+        cnt2 = Counter()
+
+        def camel_case_split(identifier):
+            matches = refinditer(
+                '.+?(?:(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])|$)',
+                identifier)
+            return [m.group(0) for m in matches]
+
+        def under_score_split(identifier):
+            return identifier.split('_')
+
         def get_subsequences(word):
-            for start in range(0, len(word) + 1):
-                for end in range(start + 1, len(word) + 1):
-                    if end > len(word):
-                        continue
-                    sub = word[start:end]
-                    if '_' in sub:
-                        continue
-                    yield sub
+            if is_camel(word):
+                splits = camel_case_split(word)
+            elif is_under(word):
+                splits = under_score_split(word)
+            else:
+                splits = [word]
+            for split in splits:
+                yield split
 
         for var in self.variables:
             for sub in get_subsequences(var):
-                # 1 letter prefixes are too common, ignore?
+                if len(sub) > 1:
+                    # 1 letter prefixes are too common, ignore?
+                    cnt2[sub] += 1
                 cnt[sub] += 1
 
-        most_common = cnt.most_common(1)[0]
+        if len(cnt2):
+            # try to get variables that are larger than 2
+            most_common = cnt2.most_common(1)[0]
+        else:
+            most_common = cnt.most_common(1)[0]
         sub, count = most_common
 
         return Result(
             sub,
             'You include these characters, %s, a lot, like %s times.' %
             (sub, count))
-
-class TestSubsequenceEngine(unittest.TestCase):
-    def test_subsequence(self):
-        engine = SubsequenceEngine(['is_bool', 'is_great', 'this_is_fun'])
-        result = engine.analyse()
-        self.assertEqual(result.attribute, 'is')
-
 
 class PrefixEngine():
     """Analyses what is the most common prefix of a variable name"""
@@ -161,24 +160,24 @@ class PrefixEngine():
 
     def analyse(self):
         cnt = Counter()
+        cnt2 = Counter()
         def get_prefixes(word):
             # 1 letter prefixes are too common, ignore
             return (word[:end] for end in range(1, len(word) + 1)) 
         for var in self.variables:
             for prefix in get_prefixes(var):
+                if len(prefix) > 1:
+                    cnt2[prefix] += 1
                 cnt[prefix] += 1
 
-        most_common = cnt.most_common(1)[0]
+        if len(cnt2):
+            most_common = cnt2.most_common(1)[0]
+        else:
+            most_common = cnt.most_common(1)[0]
+
         prefix, count = most_common
 
         return Result(prefix, self.message(prefix, count=count))
-
-class TestPrefixEngine(unittest.TestCase):
-    def test_prefixes(self):
-        engine = PrefixEngine(['asdf', 'asbf', 'abc'])
-        result = engine.analyse()
-        self.assertEqual(result.attribute, 'as')
-
 
 class VerbosityEngine():
     """Analyses how concise/verbose you are based on variable name length"""
@@ -214,18 +213,6 @@ class VerbosityEngine():
             style = 'confused'
         return Result(style, self.message(style))
 
-class TestVerbosityEngine(unittest.TestCase):
-    def test_concise(self):
-        engine = VerbosityEngine(['s', 'h', 'o', 'r', 't', 'is', 'sweet'])
-        result = engine.analyse()
-        self.assertEqual(result.attribute, 'concise')
-
-    def test_verbose(self):
-        engine = VerbosityEngine(['short', 'is', 'sweet'])
-        result = engine.analyse()
-        self.assertEqual(result.attribute, 'concise')
-
-
 class CasingEngine():
     """Analyses the case convention of variable names"""
     def __init__(self, variables):
@@ -248,21 +235,6 @@ class CasingEngine():
         return msg
 
     def analyse(self):
-        camel_re = re.compile(r'[a-z]+[A-Z]')
-        def is_camel(var):
-            """e.g. isCamelCase"""
-            return '_' not in var and re.match(camel_re, var) is not None
-        def is_under(var):
-            """e.g. is_underscore_case"""
-            return '_' in var
-        def case(var):
-            if is_camel(var):
-                return 'camelCase'
-            elif is_under(var):
-                return 'under_score'
-            else:
-                return 'neutral'
-
         cnt = Counter()
         for var in self.variables:
             cnt[case(var)] += 1
@@ -277,23 +249,6 @@ class CasingEngine():
             case_style = 'under_score'
 
         return Result(case_style, self.message(case_style))
-
-class TestCasingEngine(unittest.TestCase):
-    def test_camel(self):
-        ce = CasingEngine(['camelCase', 'everyThing'])
-        result = ce.analyse()
-        self.assertEqual(result.attribute, 'camelCase')
-
-    def test_under(self):
-        ce = CasingEngine(['under_score', 'every_thing'])
-        result = ce.analyse()
-        self.assertEqual(result.attribute, 'under_score')
-
-    def test_under(self):
-        ce = CasingEngine(['neutral', 'basic'])
-        result = ce.analyse()
-        self.assertEqual(result.attribute, 'neutral')
-
 
 class Result():
     """The analysis result that an engine came up with"""
@@ -310,6 +265,22 @@ class Result():
             'reason': self.reason,
         }
 
+
+camel_re = re.compile(r'[a-z]+[A-Z]')
+
+def is_camel(var):
+    """e.g. isCamelCase"""
+    return '_' not in var and re.match(camel_re, var) is not None
+def is_under(var):
+    """e.g. is_underscore_case"""
+    return '_' in var
+def case(var):
+    if is_camel(var):
+        return 'camelCase'
+    elif is_under(var):
+        return 'under_score'
+    else:
+        return 'neutral'
 
 if __name__ == '__main__':
     unittest.main()

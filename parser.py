@@ -1,5 +1,4 @@
 import subprocess
-import unittest
 
 import logging
 logging.basicConfig(level=logging.DEBUG)
@@ -31,21 +30,6 @@ def get_var(lines):
         if len(arr) >= 3:
             if arr[0] == VAR_IDENTIFIER and arr[2]:
                 yield arr[2]
-
-
-class TestAnalyse(unittest.TestCase):
-    def test_all(self):
-        self.assertEqual(
-            ['VARNAME NAME x 1 [source_file: test_snippet.js]',
-             'VARNAME NAME y 2 [source_file: test_snippet.js] [is_constant_var: 1]'],
-            list(parse()))
-
-
-class TestGetVar(unittest.TestCase):
-    def test_all(self):
-        lines = ['VARNAME VAR x', 'VARNAME VAR y']
-        variables = list(get_var(lines))
-        self.assertEqual(['x', 'y'], variables)
 
 if __name__ == '__main__':
     unittest.main()
