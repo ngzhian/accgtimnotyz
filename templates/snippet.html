@@ -5,66 +5,83 @@
 <body>
 <div class="container">
   <h1>CodeStats</h1>
-  <div class="highlights-block">
+  <p>Here's a breakdown of your code:</p>
+
+  <div class="block engines-block">
     {% for n, v in results['analysis'].items() %}
-    <p>{{ v['reason'] }}</p>
+    <div class="engine full-page">
+      <h2 class="engine-name">{{ n }}</h2>
+      <p class="engine-attribute">
+      {{ results['analysis'][n]['attribute'] }}
+      </p>
+      <p class="engine-message">
+      {{ results['analysis'][n]['reason'] }}
+      </p>
+    </div>
     {% endfor %}
+  </div><!-- end engines-block -->
 
-    <h2>Longest variable</h2>
-    {% for n, v in results['highlights']['longest'].items() %}
-    <p>{{ n }} </p>
-    <p>has {{ v }} characters!</p>
-    {% endfor %}
+  <div class="block highlights-block">
 
-    <h2>Most used variable name</h2>
-    {% for n, v in results['highlights']['most_used'].items() %}
-    <p>{{ n }} </p>
-    <p>Used {{ v }} times!</p>
-    {% endfor %}
+    <div class="half-block full-page">
+      <h2 class="highlight-title">Longest variable</h2>
+      {% for n, v in results['highlights']['longest'].items() %}
+      <p class="highlight-variable">{{ n }} </p>
+      <p>has {{ v }} characters!</p>
+      {% endfor %}
+    </div>
+
+    <div class="half-block full-page">
+      <h2 class="highlight-title">Most used variable name</h2>
+      {% for n, v in results['highlights']['most_used'].items() %}
+      <p class="highlight-variable">{{ n }} </p>
+      <p>Used {{ v }} times!</p>
+      {% endfor %}
+    </div>
 
   </div><!-- end highlights-block -->
 
-  <div class="stats-block">
+  <div class="block stats-block">
 
-    <h2>Top 10 longest variable names</h2>
-    <table class="leaderboard">
-      <tbody>
-      {% for l in results['stats']['longest_10'] %}
-      <tr>
-        {% for n, v in l.items() %}
-        <td>{{ n }}</td>
-        <td>{{ v }}</td>
-      </tr>
-      {% endfor %}
-      {% endfor %}
-      </tbody>
-    </table>
+    <div class="half-block full-page">
+      <h2 class="stat-title">Top 10 longest variable names</h2>
+      <table class="leaderboard">
+        <tbody>
+        {% for l in results['stats']['longest_10'] %}
+        <tr>
+          {% for n, v in l.items() %}
+          <td>{{ n }}</td>
+          <td>{{ v }}</td>
+        </tr>
+        {% endfor %}
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
 
-    <h2>Top 10 most used variable names</h2>
-    <table class="leaderboard">
-      <tbody>
-      {% for l in results['stats']['most_used_10'] %}
-      <tr>
-        {% for n, v in l.items() %}
-        <td>{{ n }}</td>
-        <td>{{ v }}</td>
-      </tr>
-      {% endfor %}
-      {% endfor %}
-      </tbody>
-    </table>
+    <div class="half-block full-page">
+      <h2 class="stat-title">Top 10 most used variable names</h2>
+      <table class="leaderboard">
+        <tbody>
+        {% for l in results['stats']['most_used_10'] %}
+        <tr>
+          {% for n, v in l.items() %}
+          <td>{{ n }}</td>
+          <td>{{ v }}</td>
+        </tr>
+        {% endfor %}
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
 
   </div><!-- end stats-block -->
 
   <div class="raw-block" style="display: none;">
     {{ results }}
   </div>
-  <div class="all-vars-block">
-    <h2>Here are all the variable names you used</h2>
-    {% for var in results['raw']['length'].keys() %}
-    <p>{{ var }} </p>
-    {% endfor %}
-  </div>
+
+
 </div>
 </body>
 </html>

@@ -5,12 +5,72 @@
 <body>
 <div class="container">
   <h1>CodeStats</h1>
-  <form action="/s" method="POST">
+  <form id="form" action="/s" method="POST">
     <textarea id="snippet" name="snippet" cols="80" rows="20">var x = 1, y = 0;</textarea>
     <div>
       <button class="submit-btn" type="submit">Lets go!</button>
     </div>
   </form>
+  <form id="phone" action="/t" method="POST" style="display: none;">
+    <p>This might take a while, want us to text you when it's done?</p>
+    <input id="phoneNumber" type="text" name="number"/>
+    <button id="yesPhone" class="btn-lg" type="submit">Yes!</button>
+    <button id="noPhone" class="btn-lg" type="submit">No :(</button>
+  </form>
+  <div id="numberSaved">
+  </div>
+  <div id="view">
+  </div>
 </div>
+<script src="../static/jquery-2.1.4.js" type="text/javascript"></script>
+<script>
+window.FID = Math.round(Math.random()*1000000);
+
+var phoneForm = $('#phone');
+var yesPhone = $('#yesPhone');
+var noPhone = $('#noPhone');
+
+yesPhone.click(function(e) {
+  e.preventDefault();
+  $.post('/t', {
+    'number': $('#phoneNumber').val(),
+    'fid': window.FID
+  })
+  .done(function(response) {
+    if (response && response.message) {
+      phoneForm.hide();
+      $('#numberSaved').text(response.message);
+      actuallySubmit();
+    }
+  });
+});
+
+noPhone.click(function(e) {
+  e.preventDefault();
+  phoneForm.hide();
+  actuallySubmit();
+});
+
+$('#form').submit(function(e) {
+  e.preventDefault();
+  phoneForm.show();
+  $(this).find('[type=submit]').hide();
+});
+
+function actuallySubmit() {
+  $.post('/s', {
+    'snippet': $('#snippet').val(),
+    'fid': window.FID
+  })
+  .done(function(response) {
+    if (response && response.url) {
+      window.setTimeout(function() {
+        $('#view').html('It\'s done, <a href="' + response.url + '">view it!</a>')
+      }, 5000);
+    }
+  });
+}
+
+</script>
 </body>
 </html>

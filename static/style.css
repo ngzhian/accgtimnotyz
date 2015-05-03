@@ -1,23 +1,83 @@
 body {
-  font-size: 20px;
+    margin: 0;
+    font-size: 20px;
 }
 
 .container {
-  max-width: 1024px;
-  margin: auto auto;
-  text-align: center;
+    max-width: 1024px;
+    margin: auto auto;
+    text-align: center;
 }
 
 textarea, button {
-  font-size: inherit;
+    font-size: inherit;
+}
+
+.block {
+    margin: 40px 0 ;
+}
+
+.half-block {
+    width: 49%;
+    display: inline-block;
 }
 
 .submit-btn {
-  padding: 12px;
-  margin: 24px;
-  width: 50%;
+    padding: 12px;
+    margin: 24px;
+    width: 50%;
+}
+
+.btn-lg {
+    padding: 12px;
+}
+
+#phoneNumber {
+    padding: 12px;
+    margin: 24px;
+    width: 50%;
 }
 
 .leaderboard {
     width: 100%;
+}
+
+.engines-block {
+}
+
+.engines-block .engine-name {
+    font-weight: 100;
+}
+
+.engines-block .engine-attribute {
+    line-height: 20vh;
+    font-size: 128px;
+    font-weight: 500;
+    font-family: monospace;
+}
+
+.engines-block .engine-message {
+    font-size: 36px;
+}
+
+.full-page {
+    height: 90vh;
+}
+
+.engines-block .engine {
+    width: 100%;
+    vertical-align: center;
+}
+
+.highlight-title {
+    font-weight: 100;
+}
+
+.highlight-variable {
+    line-height: 20vh;
+    font-size: 42px;
+}
+
+.stat-title {
+    font-weight: 100;
 }
